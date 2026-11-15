@@ -7,23 +7,33 @@ A simple countdown timer for the terminal, written in Rust.
 - When time's up, an alarm sounds until you stop it, then the timer resets to the time you last used
 - Warns you if your sound is muted or the volume is too low to hear the alarm
 
-## Requirements
+## Install
 
-- **macOS**: the alarm uses `afplay` and the mute check uses `osascript`, both built into macOS
-- **Rust** (2024 edition): install from [rustup.rs](https://rustup.rs)
-
-## Install & run
+Works on macOS (Apple Silicon and Intel). Paste this into Terminal:
 
 ```sh
-git clone https://github.com/Gus-Eisen/rust-timer.git
-cd rust-timer
-cargo run --release
+curl -fsSL https://github.com/Gus-Eisen/rust-timer/releases/latest/download/rust-timer-macos.tar.gz | tar xz \
+  && sudo mkdir -p /usr/local/bin && sudo mv rust-timer /usr/local/bin/
 ```
 
-Or install it so you can run `rust-timer` from anywhere:
+It asks for your Mac password to install the program into `/usr/local/bin`. Then start it from any terminal:
 
 ```sh
-cargo install --path .
+rust-timer
+```
+
+> **Downloaded with a browser instead?** macOS blocks apps from unidentified
+> developers that were downloaded in a browser. After extracting, run
+> `xattr -d com.apple.quarantine rust-timer` once before moving it into place.
+
+To uninstall: `sudo rm /usr/local/bin/rust-timer`
+
+### Build from source
+
+Requires [Rust](https://rustup.rs) (2024 edition):
+
+```sh
+cargo install --git https://github.com/Gus-Eisen/rust-timer
 ```
 
 ## Usage
@@ -57,6 +67,17 @@ A yellow banner appears at the top of the screen if:
 - your volume is **below 25%** (set by `LOW_VOLUME_THRESHOLD` in `src/sound.rs`)
 
 The volume is checked when the app starts, every 2 seconds while it runs, and again when you start the timer. Unmute or turn the volume up and the banner disappears.
+
+## Releasing
+
+Push a version tag and GitHub Actions builds a universal macOS binary and
+publishes it as a release:
+
+```sh
+git tag v0.1.0 && git push origin v0.1.0
+```
+
+Bump `version` in `Cargo.toml` first for new versions.
 
 ## Project layout
 
