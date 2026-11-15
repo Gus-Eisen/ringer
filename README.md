@@ -69,3 +69,7 @@ src/
 ```
 
 Built with [ratatui](https://ratatui.rs) and [crossterm](https://github.com/crossterm-rs/crossterm).
+
+## License
+
+[MIT](LICENSE)
