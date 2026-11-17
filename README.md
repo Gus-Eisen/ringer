@@ -1,4 +1,10 @@
-# ringer
+```text
+████   ███  █   █  █████  █████  ████
+█   █   █   ██  █  █      █      █   █
+████    █   █ █ █  █  ██  ████   ████
+█  █    █   █  ██  █   █  █      █  █
+█   █  ███  █   █  █████  █████  █   █
+```
 
 A simple countdown timer for the terminal, written in Rust.
 
