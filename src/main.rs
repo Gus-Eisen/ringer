@@ -23,7 +23,7 @@ const WAVE: &str = "*~";
 enum Mode {
     /// Entering a time. Digits fill from the right, microwave style.
     Input,
-    Running { end: Instant },
+    Running { end: Instant, total: Duration },
     /// Holding the Alarm keeps it ringing; dropping it stops the sound.
     Ringing { _alarm: Alarm },
 }
@@ -60,7 +60,7 @@ impl App {
     }
 
     fn tick(&mut self) {
-        if let Mode::Running { end } = self.mode {
+        if let Mode::Running { end, .. } = self.mode {
             if Instant::now() >= end {
                 self.mode = Mode::Ringing { _alarm: Alarm::start() };
             }
@@ -87,7 +87,7 @@ impl App {
                     let duration = self.input_duration();
                     if !duration.is_zero() {
                         self.mute.check_now();
-                        self.mode = Mode::Running { end: Instant::now() + duration };
+                        self.mode = Mode::Running { end: Instant::now() + duration, total: duration };
                     }
                 }
                 KeyCode::Char('q') | KeyCode::Esc => self.quit = true,
@@ -161,14 +161,15 @@ impl App {
                     "0-9 set time · Backspace erase · Del clear · Enter start · q quit",
                 )
             }
-            Mode::Running { end } => {
+            Mode::Running { end, total } => {
                 let left = end.saturating_duration_since(Instant::now());
+                let remaining = left.as_secs_f64() / total.as_secs_f64();
                 // Round up so the display shows 00:00:01 until the very end.
                 let secs = left.as_secs() + u64::from(left.subsec_nanos() > 0);
                 let offset = (elapsed / 150) as usize;
                 (
                     format!("{:02}:{:02}:{:02}", secs / 3600, (secs / 60) % 60, secs % 60),
-                    Style::new().fg(Color::Green),
+                    Style::new().fg(countdown_color(remaining)),
                     wave(offset, inner.width.saturating_sub(4) as usize),
                     "Esc cancel · q quit",
                 )
@@ -189,6 +190,28 @@ impl App {
         frame.render_widget(Paragraph::new(anim_line).centered(), anim);
         frame.render_widget(Paragraph::new(help_text).centered().dim(), help);
     }
+}
+
+/// Fades from green (all time left) through yellow to red (none left).
+/// `remaining` is the fraction of the total duration still to go.
+fn countdown_color(remaining: f64) -> Color {
+    // Hue 120° (green) down to 0° (red) at full saturation and brightness.
+    let hue = 120.0 * remaining.clamp(0.0, 1.0);
+    let (r, g) = if hue >= 60.0 { ((120.0 - hue) / 60.0, 1.0) } else { (1.0, hue / 60.0) };
+    if supports_truecolor() {
+        Color::Rgb((r * 255.0).round() as u8, (g * 255.0).round() as u8, 0)
+    } else {
+        // Nearest colour in the 6x6x6 cube of the 256-colour palette.
+        let level = |v: f64| (v * 5.0).round() as u8;
+        Color::Indexed(16 + 36 * level(r) + 6 * level(g))
+    }
+}
+
+fn supports_truecolor() -> bool {
+    static TRUECOLOR: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *TRUECOLOR.get_or_init(|| {
+        std::env::var("COLORTERM").is_ok_and(|v| v == "truecolor" || v == "24bit")
+    })
 }
 
 /// A `*~*~*~` wave scrolling to the right, coloured with a moving gradient.

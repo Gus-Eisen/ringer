@@ -4,6 +4,7 @@ A simple countdown timer for the terminal, written in Rust.
 
 - Enter a time as `HH:MM:SS`
 - A `*~*~*~` wave scrolls across the screen while the timer runs
+- The countdown fades from green to red as time runs out
 - When time's up, an alarm sounds until you stop it, then the timer resets to the time you last used
 - Warns you if your sound is muted or the volume is too low to hear the alarm
 
