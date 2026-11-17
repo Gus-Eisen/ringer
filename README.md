@@ -8,7 +8,7 @@
 
 A terminal countdown timer that warns you when you won't hear the alarm.
 
-A timer is no use if you can't hear it. ringer notices when your Mac is muted or too quiet, and tells you before you start, while it counts down, and when it rings.
+A timer is no use if you can't hear it. ringer notices when your computer is muted or too quiet, and tells you before you start, while it counts down, and when it rings.
 
 ![ringer counting down from 10 seconds with the volume warning showing](assets/demo.gif)
 
@@ -20,7 +20,11 @@ A timer is no use if you can't hear it. ringer notices when your Mac is muted or
 
 ## Install
 
-Works on macOS (Apple Silicon and Intel). With [Homebrew](https://brew.sh):
+Works on macOS (Apple Silicon and Intel) and Linux (x86_64 and arm64).
+
+### macOS
+
+With [Homebrew](https://brew.sh):
 
 ```sh
 brew install gus-eisen/tap/ringer
@@ -34,7 +38,7 @@ ringer
 
 Update with `brew upgrade ringer`, uninstall with `brew uninstall ringer`.
 
-### Without Homebrew
+#### Without Homebrew
 
 Paste this into Terminal:
 
@@ -48,6 +52,24 @@ It asks for your Mac password to install the program into `/usr/local/bin`.
 > **Downloaded with a browser instead?** macOS blocks apps from unidentified
 > developers that were downloaded in a browser. After extracting, run
 > `xattr -d com.apple.quarantine ringer` once before moving it into place.
+
+To uninstall: `sudo rm /usr/local/bin/ringer`
+
+### Linux
+
+Paste this into a terminal. It picks the right build for your machine and
+asks for your password to install into `/usr/local/bin`:
+
+```sh
+curl -fsSL https://github.com/Gus-Eisen/ringer/releases/latest/download/ringer-linux-$(uname -m).tar.gz | tar xz \
+  && sudo mkdir -p /usr/local/bin && sudo mv ringer /usr/local/bin/
+```
+
+The binary is static, so it runs on any distro. The volume warning reads your
+default output from PipeWire (`wpctl`), PulseAudio (`pactl`) or ALSA
+(`amixer`), and the alarm plays through `pw-play`, `paplay` or `aplay`,
+whichever you have. Without any of them, the volume warning stays off and the
+alarm rings the terminal bell instead.
 
 To uninstall: `sudo rm /usr/local/bin/ringer`
 
@@ -102,8 +124,8 @@ The volume is checked when the app starts, every 2 seconds while it runs, and ag
 
 ## Releasing
 
-Push a version tag and GitHub Actions builds a universal macOS binary,
-publishes it as a release, and updates the Homebrew formula in
+Push a version tag and GitHub Actions builds a universal macOS binary and
+static Linux binaries (x86_64 and arm64), publishes them as a release, and updates the Homebrew formula in
 [Gus-Eisen/homebrew-tap](https://github.com/Gus-Eisen/homebrew-tap):
 
 ```sh

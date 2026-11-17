@@ -1,6 +1,7 @@
-# Builds a universal (Apple Silicon + Intel) macOS binary and publishes it as
-# a GitHub release whenever a version tag like v0.1.0 is pushed, then points
-# the Homebrew formula in Gus-Eisen/homebrew-tap at the new release.
+# Whenever a version tag like v0.1.0 is pushed, builds a universal (Apple
+# Silicon + Intel) macOS binary and static Linux binaries (x86_64 + arm64),
+# publishes them as a GitHub release, then points the Homebrew formula in
+# Gus-Eisen/homebrew-tap at the new macOS release.
 name: Release
 
 on:
@@ -11,7 +12,46 @@ permissions:
   contents: write
 
 jobs:
+  linux:
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            arch: x86_64
+          - runner: ubuntu-24.04-arm
+            arch: aarch64
+    runs-on: ${{ matrix.runner }}
+    env:
+      TARGET: ${{ matrix.arch }}-unknown-linux-musl
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Rust target
+        run: |
+          sudo apt-get update && sudo apt-get install -y musl-tools
+          rustup update stable
+          rustup default stable
+          rustup target add "$TARGET"
+
+      - name: Test
+        run: cargo test --locked
+
+      # musl gives a fully static binary that runs on any distro.
+      - name: Build
+        run: cargo build --locked --release --target "$TARGET"
+
+      - name: Package
+        run: |
+          tar -czf ringer-linux-${{ matrix.arch }}.tar.gz -C "target/$TARGET/release" ringer
+          sha256sum ringer-linux-${{ matrix.arch }}.tar.gz > ringer-linux-${{ matrix.arch }}.tar.gz.sha256
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.arch }}
+          path: ringer-linux-*
+
   release:
+    needs: linux
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v5
@@ -40,12 +80,18 @@ jobs:
           tar -czf ringer-macos.tar.gz -C dist ringer
           shasum -a 256 ringer-macos.tar.gz > ringer-macos.tar.gz.sha256
 
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: linux-*
+          merge-multiple: true
+
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$GITHUB_REF_NAME" \
             ringer-macos.tar.gz ringer-macos.tar.gz.sha256 \
+            ringer-linux-*.tar.gz ringer-linux-*.tar.gz.sha256 \
             --title "ringer $GITHUB_REF_NAME" \
             --generate-notes
 
