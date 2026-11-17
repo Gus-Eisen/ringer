@@ -1,5 +1,6 @@
 # Builds a universal (Apple Silicon + Intel) macOS binary and publishes it as
-# a GitHub release whenever a version tag like v0.1.0 is pushed.
+# a GitHub release whenever a version tag like v0.1.0 is pushed, then points
+# the Homebrew formula in Gus-Eisen/homebrew-tap at the new release.
 name: Release
 
 on:
@@ -47,3 +48,24 @@ jobs:
             ringer-macos.tar.gz ringer-macos.tar.gz.sha256 \
             --title "ringer $GITHUB_REF_NAME" \
             --generate-notes
+
+      # Needs a HOMEBREW_TAP_TOKEN secret: a fine-grained token with
+      # Contents read/write access to Gus-Eisen/homebrew-tap only.
+      - name: Update Homebrew tap
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          if [ -z "$TAP_TOKEN" ]; then
+            echo "::warning::HOMEBREW_TAP_TOKEN isn't set, so the Homebrew formula wasn't updated."
+            exit 0
+          fi
+          sha=$(cut -d' ' -f1 ringer-macos.tar.gz.sha256)
+          url="https://github.com/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME/ringer-macos.tar.gz"
+          git clone --depth 1 "https://x-access-token:$TAP_TOKEN@github.com/Gus-Eisen/homebrew-tap.git" tap
+          cd tap
+          sed -i '' -e "s|^  url \".*\"|  url \"$url\"|" -e "s|^  sha256 \".*\"|  sha256 \"$sha\"|" Formula/ringer.rb
+          git diff --stat
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "ringer ${GITHUB_REF_NAME#v}"
+          git push

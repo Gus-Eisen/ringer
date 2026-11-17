@@ -20,18 +20,30 @@ A timer is no use if you can't hear it. ringer notices when your Mac is muted or
 
 ## Install
 
-Works on macOS (Apple Silicon and Intel). Paste this into Terminal:
+Works on macOS (Apple Silicon and Intel). With [Homebrew](https://brew.sh):
+
+```sh
+brew install gus-eisen/tap/ringer
+```
+
+Then start it from any terminal:
+
+```sh
+ringer
+```
+
+Update with `brew upgrade ringer`, uninstall with `brew uninstall ringer`.
+
+### Without Homebrew
+
+Paste this into Terminal:
 
 ```sh
 curl -fsSL https://github.com/Gus-Eisen/ringer/releases/latest/download/ringer-macos.tar.gz | tar xz \
   && sudo mkdir -p /usr/local/bin && sudo mv ringer /usr/local/bin/
 ```
 
-It asks for your Mac password to install the program into `/usr/local/bin`. Then start it from any terminal:
-
-```sh
-ringer
-```
+It asks for your Mac password to install the program into `/usr/local/bin`.
 
 > **Downloaded with a browser instead?** macOS blocks apps from unidentified
 > developers that were downloaded in a browser. After extracting, run
@@ -90,8 +102,9 @@ The volume is checked when the app starts, every 2 seconds while it runs, and ag
 
 ## Releasing
 
-Push a version tag and GitHub Actions builds a universal macOS binary and
-publishes it as a release:
+Push a version tag and GitHub Actions builds a universal macOS binary,
+publishes it as a release, and updates the Homebrew formula in
+[Gus-Eisen/homebrew-tap](https://github.com/Gus-Eisen/homebrew-tap):
 
 ```sh
 git tag v0.1.0 && git push origin v0.1.0
