@@ -61,7 +61,7 @@ Type digits to set the time. They fill in from the right, like a microwave:
 
 ### Volume warning
 
-A yellow banner appears at the top of the screen if:
+A yellow banner appears above the clock, and the window border turns yellow, if:
 
 - your sound is **muted**
 - your volume is **0**

@@ -124,13 +124,20 @@ impl App {
 
     fn draw(&self, frame: &mut Frame) {
         let area = frame.area();
+        let mute_warning = self.mute.warning();
+        // While the alarm might not be heard, the whole frame turns yellow.
+        let frame_style = match mute_warning {
+            Some(_) => Style::new().fg(Color::Yellow),
+            None => Style::new(),
+        };
         let block = Block::bordered()
             .border_type(BorderType::Rounded)
-            .title(Line::from(" rust-timer ").bold().centered());
+            .border_style(frame_style)
+            .title(Line::from(" rust-timer ").bold().centered().style(frame_style));
         let inner = block.inner(area);
         frame.render_widget(block, area);
 
-        let [warning, _, clock, _, anim, _, help] = Layout::vertical([
+        let [_, _, clock, _, anim, _, help] = Layout::vertical([
             Constraint::Length(1),
             Constraint::Fill(1),
             Constraint::Length(font::HEIGHT as u16),
@@ -141,13 +148,14 @@ impl App {
         ])
         .areas(inner);
 
-        if let Some(msg) = self.mute.warning() {
-            frame.render_widget(
-                Paragraph::new(format!("⚠  {msg}"))
-                    .centered()
-                    .style(Style::new().fg(Color::Black).bg(Color::Yellow).bold()),
-                warning,
-            );
+        // Shown just above the clock, where the eye already is, leaving a
+        // blank row between them when there's room.
+        if let Some(msg) = mute_warning {
+            let gap = if clock.y >= inner.y + 2 { 2 } else { 1 };
+            let warning = Rect { y: clock.y.saturating_sub(gap).max(inner.y), height: 1, ..clock };
+            let banner = Line::from(format!(" ⚠  {msg} "))
+                .style(Style::new().fg(Color::Black).bg(Color::Yellow).bold());
+            frame.render_widget(Paragraph::new(banner).centered(), warning);
         }
 
         let elapsed = self.started.elapsed().as_millis();
