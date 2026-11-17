@@ -6,15 +6,17 @@
 █   █  ███  █   █  █████  █████  █   █
 ```
 
-A simple countdown timer for the terminal, written in Rust.
+A terminal countdown timer that warns you when you won't hear the alarm.
+
+A timer is no use if you can't hear it. ringer notices when your Mac is muted or too quiet, and tells you before you start, while it counts down, and when it rings.
 
 ![ringer counting down from 10 seconds with the volume warning showing](assets/demo.gif)
 
-- Enter a time as `HH:MM:SS`
+- Start it with a time, like `ringer 25m`, or type one in on screen
+- Warns you if your sound is muted or too quiet to hear the alarm
 - A `*~*~*~` wave scrolls across the screen while the timer runs
 - The countdown fades from green to red as time runs out
 - When time's up, an alarm sounds until you stop it, then the timer resets to the time you last used
-- Warns you if your sound is muted or the volume is too low to hear the alarm
 
 ## Install
 
@@ -47,7 +49,16 @@ cargo install --git https://github.com/Gus-Eisen/ringer
 
 ## Usage
 
-Type digits to set the time. They fill in from the right, like a microwave:
+Start counting down right away by giving a time:
+
+```sh
+ringer 25m        # 25 minutes
+ringer 1h30m      # 1 hour 30 minutes (also: ringer 1h 30m)
+ringer 90s        # 90 seconds (a bare number like 90 also means seconds)
+ringer 1:30       # minutes:seconds, or hours:minutes:seconds like 1:02:03
+```
+
+Or run `ringer` on its own and type digits to set the time. They fill in from the right, like a microwave:
 
 | You type | Timer is set to |
 |----------|-----------------|
@@ -93,6 +104,7 @@ Bump `version` in `Cargo.toml` first for new versions.
 ```
 src/
 ├── main.rs    # app state, key handling, drawing, animation
+├── args.rs    # command-line times like 25m or 1:30
 ├── sound.rs   # mute / low-volume detection
 ├── alarm.rs   # looping alarm sound
 └── font.rs    # big block digits for the countdown

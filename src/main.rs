@@ -1,4 +1,5 @@
 mod alarm;
+mod args;
 mod font;
 mod sound;
 
@@ -37,14 +38,29 @@ struct App {
 }
 
 impl App {
-    fn new() -> Self {
-        Self {
+    /// Opens on the input screen, or starts counting down right away when
+    /// given a duration (from the command line).
+    fn new(start: Option<Duration>) -> Self {
+        let mut app = Self {
             digits: String::new(),
             mode: Mode::Input,
             mute: MuteMonitor::start(),
             started: Instant::now(),
             quit: false,
+        };
+        if let Some(duration) = start {
+            // Fill in the digits too, so stopping the alarm resets to this time.
+            let secs = duration.as_secs();
+            let hms = format!("{:02}{:02}{:02}", secs / 3600, (secs / 60) % 60, secs % 60);
+            app.digits = hms.trim_start_matches('0').to_string();
+            app.start(duration);
         }
+        app
+    }
+
+    fn start(&mut self, duration: Duration) {
+        self.mute.check_now();
+        self.mode = Mode::Running { end: Instant::now() + duration, total: duration };
     }
 
     /// The input digits padded to six places as (hours, minutes, seconds).
@@ -86,8 +102,7 @@ impl App {
                 KeyCode::Enter => {
                     let duration = self.input_duration();
                     if !duration.is_zero() {
-                        self.mute.check_now();
-                        self.mode = Mode::Running { end: Instant::now() + duration, total: duration };
+                        self.start(duration);
                     }
                 }
                 KeyCode::Char('q') | KeyCode::Esc => self.quit = true,
@@ -251,8 +266,25 @@ fn render_clock(frame: &mut Frame, area: Rect, text: &str, style: Style) {
 }
 
 fn main() -> std::io::Result<()> {
+    let argv: Vec<String> = std::env::args().skip(1).collect();
+    let start = match args::parse(&argv) {
+        Ok(args::Command::Run(start)) => start,
+        Ok(args::Command::Help) => {
+            println!("{}", args::USAGE);
+            return Ok(());
+        }
+        Ok(args::Command::Version) => {
+            println!("ringer {}", env!("CARGO_PKG_VERSION"));
+            return Ok(());
+        }
+        Err(msg) => {
+            eprintln!("ringer: {msg}\n\nRun 'ringer --help' for usage.");
+            std::process::exit(2);
+        }
+    };
+
     let mut terminal = ratatui::init();
-    let result = App::new().run(&mut terminal);
+    let result = App::new(start).run(&mut terminal);
     ratatui::restore();
     result
 }
