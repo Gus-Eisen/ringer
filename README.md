@@ -2,6 +2,8 @@
 
 A simple countdown timer for the terminal, written in Rust.
 
+![ringer counting down from 10 seconds with the volume warning showing](assets/demo.gif)
+
 - Enter a time as `HH:MM:SS`
 - A `*~*~*~` wave scrolls across the screen while the timer runs
 - The countdown fades from green to red as time runs out
@@ -89,6 +91,9 @@ src/
 ├── alarm.rs   # looping alarm sound
 └── font.rs    # big block digits for the countdown
 ```
+
+The demo GIF is recorded with [vhs](https://github.com/charmbracelet/vhs) from `demo.tape`:
+`cargo build --release && vhs demo.tape` (mute your Mac first so the volume warning shows).
 
 Built with [ratatui](https://ratatui.rs) and [crossterm](https://github.com/crossterm-rs/crossterm).
 
