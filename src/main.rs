@@ -133,7 +133,7 @@ impl App {
         let block = Block::bordered()
             .border_type(BorderType::Rounded)
             .border_style(frame_style)
-            .title(Line::from(" rust-timer ").bold().centered().style(frame_style));
+            .title(Line::from(" ringer ").bold().centered().style(frame_style));
         let inner = block.inner(area);
         frame.render_widget(block, area);
 

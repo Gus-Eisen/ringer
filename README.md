@@ -1,4 +1,4 @@
-# rust-timer
+# ringer
 
 A simple countdown timer for the terminal, written in Rust.
 
@@ -13,28 +13,28 @@ A simple countdown timer for the terminal, written in Rust.
 Works on macOS (Apple Silicon and Intel). Paste this into Terminal:
 
 ```sh
-curl -fsSL https://github.com/Gus-Eisen/rust-timer/releases/latest/download/rust-timer-macos.tar.gz | tar xz \
-  && sudo mkdir -p /usr/local/bin && sudo mv rust-timer /usr/local/bin/
+curl -fsSL https://github.com/Gus-Eisen/ringer/releases/latest/download/ringer-macos.tar.gz | tar xz \
+  && sudo mkdir -p /usr/local/bin && sudo mv ringer /usr/local/bin/
 ```
 
 It asks for your Mac password to install the program into `/usr/local/bin`. Then start it from any terminal:
 
 ```sh
-rust-timer
+ringer
 ```
 
 > **Downloaded with a browser instead?** macOS blocks apps from unidentified
 > developers that were downloaded in a browser. After extracting, run
-> `xattr -d com.apple.quarantine rust-timer` once before moving it into place.
+> `xattr -d com.apple.quarantine ringer` once before moving it into place.
 
-To uninstall: `sudo rm /usr/local/bin/rust-timer`
+To uninstall: `sudo rm /usr/local/bin/ringer`
 
 ### Build from source
 
 Requires [Rust](https://rustup.rs) (2024 edition):
 
 ```sh
-cargo install --git https://github.com/Gus-Eisen/rust-timer
+cargo install --git https://github.com/Gus-Eisen/ringer
 ```
 
 ## Usage

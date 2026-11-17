@@ -32,18 +32,18 @@ jobs:
       - name: Package universal binary
         run: |
           mkdir dist
-          lipo -create -output dist/rust-timer \
-            target/aarch64-apple-darwin/release/rust-timer \
-            target/x86_64-apple-darwin/release/rust-timer
-          lipo -info dist/rust-timer
-          tar -czf rust-timer-macos.tar.gz -C dist rust-timer
-          shasum -a 256 rust-timer-macos.tar.gz > rust-timer-macos.tar.gz.sha256
+          lipo -create -output dist/ringer \
+            target/aarch64-apple-darwin/release/ringer \
+            target/x86_64-apple-darwin/release/ringer
+          lipo -info dist/ringer
+          tar -czf ringer-macos.tar.gz -C dist ringer
+          shasum -a 256 ringer-macos.tar.gz > ringer-macos.tar.gz.sha256
 
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$GITHUB_REF_NAME" \
-            rust-timer-macos.tar.gz rust-timer-macos.tar.gz.sha256 \
-            --title "rust-timer $GITHUB_REF_NAME" \
+            ringer-macos.tar.gz ringer-macos.tar.gz.sha256 \
+            --title "ringer $GITHUB_REF_NAME" \
             --generate-notes
